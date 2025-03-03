@@ -23,9 +23,9 @@ jobs:
 
     - name: Install dependencies
       run: |
-        composer install
+        composer install --no-interaction --prefer-dist --optimize-autoloader
 
-    - name: Run tests (example with PHPUnit, replace if using something else)
+    - name: Run tests
       run: |
         ./vendor/bin/phpunit
 
