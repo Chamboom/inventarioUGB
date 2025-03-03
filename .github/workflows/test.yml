@@ -1,0 +1,46 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Checkout el código
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+      # Paso 2: Configura PHP (si usas PHP en tu proyecto)
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.0'
+
+      # Paso 3: Instala dependencias (como Composer)
+    - name: Install dependencies
+      run: |
+        composer install
+
+      # Paso 4: Ejecuta las pruebas (si usas PHPUnit en este caso)
+    - name: Run PHPUnit tests
+      run: |
+        ./vendor/bin/phpunit --coverage-xml=build/coverage.xml
+
+      # Paso 5: Instala CodeClimate Test Reporter
+    - name: Install CodeClimate Test Reporter
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/codeclimate-test-reporter-0.4.1-linux-amd64 > codeclimate
+        chmod +x codeclimate
+
+      # Paso 6: Subir la cobertura a CodeClimate
+    - name: Upload coverage to CodeClimate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}  # Asegúrate de configurar tu `CC_TEST_REPORTER_ID` en los secretos de GitHub
+      run: |
+        ./codeclimate before-build
+        ./codeclimate after-build --coverage-input-file "build/coverage.xml" --coverage-input-type "simplecov"
