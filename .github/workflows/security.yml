@@ -1,0 +1,30 @@
+name: Security Analysis with OWASP ZAP
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up ZAP and run security tests
+      run: |
+        docker pull owasp/zap2docker-stable
+        docker run -t owasp/zap2docker-stable zap-baseline.py -t https://yourwebsite.com
+
+    - name: Upload ZAP Report to CodeClimate
+      run: |
+        # Asegúrate de configurar el ID de reportero de CodeClimate
+        curl -L https://codeclimate.com/downloads/test-reporter/codeclimate-test-reporter-0.4.1-linux-amd64 > codeclimate
+        chmod +x codeclimate
+        ./codeclimate before-build
+        ./codeclimate after-build --coverage-input-type "simplecov" --coverage-input-file "build/coverage.xml"
