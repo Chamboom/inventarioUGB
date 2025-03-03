@@ -13,28 +13,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out the code
-        uses: actions/checkout@v2
+    - name: Checkout Code
+      uses: actions/checkout@v2
 
-      - name: Set up Ruby (si usas Ruby, por ejemplo)
-        uses: actions/setup-ruby@v1
-        with:
-          ruby-version: '2.7'
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+          with:
+        php-version: '7.4'
 
-      - name: Install dependencies
-        run: |
-          bundle install
+    - name: Install dependencies
+      run: |
+        composer install
 
-      - name: Run tests (si usas Ruby)
-        run: |
-          bundle exec rspec # O el comando correspondiente para tu proyecto
+    - name: Run tests (example with PHPUnit, replace if using something else)
+      run: |
+        ./vendor/bin/phpunit
 
-      - name: Set up CodeClimate
-        uses: codeclimate/test-reporter-action@v2
-        with:
-          repo-token: ${{ secrets.CODECLIMATE_REPO_TOKEN }}
-
-      - name: Run CodeClimate analysis
-        run: |
-          # Esto ejecuta el análisis de CodeClimate
-          bundle exec codeclimate analyze
+    - name: Upload Test Coverage to CodeClimate
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      run: |
+        curl -L https://codeclimate.com/downloads/test-reporter/codeclimate-test-reporter-0.4.1-linux-amd64 > codeclimate
+        chmod +x codeclimate
+        ./codeclimate before-build
+        ./vendor/bin/phpunit --coverage-xml build/coverage.xml
+        ./codeclimate after-build --coverage-input-type "simplecov" --coverage-input-file "build/coverage.xml"
